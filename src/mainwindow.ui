@@ -22,17 +22,17 @@
       </property>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>Connection</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>Configuration</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tab_5">
        <attribute name="title">
-        <string>Page</string>
+        <string>Chart</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>

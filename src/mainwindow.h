@@ -21,17 +21,24 @@ public:
     ~MainWindow();
 
 private:
+    int bufferLength = 20;
+
     Ui::MainWindow *ui;
-    QLineSeries *series;
+    QLineSeries *seriesX;
+    QLineSeries *seriesY;
+    QLineSeries *seriesZ;
     QChart *chart;
     QModbusRtuSerialMaster *modbusDevice;
     QModbusDataUnit *dataUnit;
+    QModbusDataUnit *dataReadyUnit;
     QTimer *timer;
-    int counter = 0;
+    qreal counter = 0;
 
 private slots:
-    void readModbus();
-    void readReady();
+    void readReadyBit();
+    void readReadyBitReady();
+    void readData();
+    void readDataReady();
 };
 
 #endif // MAINWINDOW_H
