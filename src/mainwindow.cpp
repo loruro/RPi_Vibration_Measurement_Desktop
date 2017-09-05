@@ -9,6 +9,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     statusBar()->showMessage(QString("Status: OK"));
+    toggleGroupBox(ui->group_live_proc, false);
+    toggleGroupBox(ui->group_record_raw, false);
+    toggleGroupBox(ui->group_record_proc, false);
 
     seriesX = new QLineSeries(this);
     seriesY = new QLineSeries(this);
@@ -52,6 +55,16 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::toggleGroupBox(QGroupBox *group, bool enable)
+{
+    foreach (QObject *object, group->children()) {
+        QWidget *widget = dynamic_cast<QWidget*>(object);
+        if (widget) {
+            widget->setEnabled(enable);
+        }
+    }
 }
 
 void MainWindow::readReadyBit()
@@ -121,4 +134,24 @@ void MainWindow::readDataReady()
     }
 
     reply->deleteLater();
+}
+
+void MainWindow::on_radio_live_raw_toggled(bool checked)
+{
+    toggleGroupBox(ui->group_live_raw, checked);
+}
+
+void MainWindow::on_radio_live_proc_toggled(bool checked)
+{
+    toggleGroupBox(ui->group_live_proc, checked);
+}
+
+void MainWindow::on_radio_record_raw_toggled(bool checked)
+{
+    toggleGroupBox(ui->group_record_raw, checked);
+}
+
+void MainWindow::on_radio_record_proc_toggled(bool checked)
+{
+    toggleGroupBox(ui->group_record_proc, checked);
 }
