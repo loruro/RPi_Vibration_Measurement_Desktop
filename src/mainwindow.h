@@ -46,6 +46,8 @@ private slots:
     void on_radio_live_proc_toggled(bool checked);
     void on_radio_record_raw_toggled(bool checked);
     void on_radio_record_proc_toggled(bool checked);
+    void on_button_start_clicked();
+    void on_button_stop_clicked();
 };
 
 #endif // MAINWINDOW_H

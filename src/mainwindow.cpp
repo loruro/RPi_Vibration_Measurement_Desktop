@@ -155,3 +155,15 @@ void MainWindow::on_radio_record_proc_toggled(bool checked)
 {
     toggleGroupBox(ui->group_record_proc, checked);
 }
+
+void MainWindow::on_button_start_clicked()
+{
+    ui->button_start->setEnabled(false);
+    ui->button_stop->setEnabled(true);
+}
+
+void MainWindow::on_button_stop_clicked()
+{
+    ui->button_start->setEnabled(true);
+    ui->button_stop->setEnabled(false);
+}
