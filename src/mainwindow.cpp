@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     chart->addSeries(seriesY);
     chart->addSeries(seriesZ);
     chart->createDefaultAxes();
+    chart->axisX()->setRange(0,30);
     chart->axisY()->setRange(-2, 2);
     chart->axisX()->setTitleText("Time [s]");
     chart->axisY()->setTitleText("Acceleration [g]");
@@ -39,16 +40,16 @@ MainWindow::MainWindow(QWidget *parent) :
     modbusDevice->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, QSerialPort::Baud115200);
     modbusDevice->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, QSerialPort::Data8);
     modbusDevice->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, QSerialPort::OneStop);
-    modbusDevice->setTimeout(250);
+    modbusDevice->setTimeout(500);
     if (!modbusDevice->connectDevice()) {
         qDebug("Connect failed\n");
     }
 
-    dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 0, 6 * bufferLength);
+    dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
     dataReadyUnit = new QModbusDataUnit(QModbusDataUnit::DiscreteInputs, 0, 1);
 
     timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(readReadyBit()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(readData()));
     timer->start(200);
 }
 
@@ -116,18 +117,32 @@ void MainWindow::readDataReady()
         return;
 
     if (reply->error() == QModbusDevice::NoError) {
+        QList<QPointF> datapointListX;
+        QList<QPointF> datapointListY;
+        QList<QPointF> datapointListZ;
         const QModbusDataUnit unit = reply->result();
         for (int i = 0; i < bufferLength; i++) {
-            float data[3];
-            for (int j = 0; j < 6; j++) {
-                *((uint16_t *)data + j) = unit.value(i * 6 + j);
-            }
-            seriesX->append(counter, data[0]);
-            seriesY->append(counter, data[1]);
-            seriesZ->append(counter, data[2]);
+            float dataX, dataY, dataZ;
+            *((uint16_t *)&dataX + 0) = unit.value(i * 2 + 0 + 0);
+            *((uint16_t *)&dataX + 1) = unit.value(i * 2 + 0 + 1);
+            *((uint16_t *)&dataY + 0) = unit.value(i * 2 + 40 + 0);
+            *((uint16_t *)&dataY + 1) = unit.value(i * 2 + 40 + 1);
+            *((uint16_t *)&dataZ + 0) = unit.value(i * 2 + 80 + 0);
+            *((uint16_t *)&dataZ + 1) = unit.value(i * 2 + 80 + 1);
+            datapointListX.append(QPointF(counter, dataX));
+            datapointListY.append(QPointF(counter, dataY));
+            datapointListZ.append(QPointF(counter, dataZ));
             counter+=0.01;
         }
-        chart->axisX()->setRange(0,counter+1);
+        seriesX->append(datapointListX);
+        seriesY->append(datapointListY);
+        seriesZ->append(datapointListZ);
+        if (counter > xSeriesLength) {
+            chart->axisX()->setRange(counter - xSeriesLength, counter);
+            seriesX->removePoints(0, 20);
+            seriesY->removePoints(0, 20);
+            seriesZ->removePoints(0, 20);
+        }
 
     } else {
         qDebug("Read data response error: %d\n", reply->error());

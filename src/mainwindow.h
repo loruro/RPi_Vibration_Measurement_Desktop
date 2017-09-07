@@ -22,7 +22,8 @@ public:
     ~MainWindow();
 
 private:
-    int bufferLength = 20;
+    const int bufferLength = 20;
+    const qreal xSeriesLength = 30.0;
 
     Ui::MainWindow *ui;
     QLineSeries *seriesX;
