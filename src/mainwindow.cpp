@@ -46,7 +46,6 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
-    dataReadyUnit = new QModbusDataUnit(QModbusDataUnit::DiscreteInputs, 0, 1);
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(readData()));
@@ -66,36 +65,6 @@ void MainWindow::toggleGroupBox(QGroupBox *group, bool enable)
             widget->setEnabled(enable);
         }
     }
-}
-
-void MainWindow::readReadyBit()
-{
-    if (auto *reply = modbusDevice->sendReadRequest(*dataReadyUnit, 0x0A)) {
-        if (!reply->isFinished())
-            connect(reply, &QModbusReply::finished, this, &MainWindow::readReadyBitReady);
-        else
-            delete reply; // broadcast replies return immediately
-    } else {
-        qDebug("Read error\n");
-    }
-}
-
-void MainWindow::readReadyBitReady()
-{
-    auto reply = qobject_cast<QModbusReply *>(sender());
-    if (!reply)
-        return;
-
-    if (reply->error() == QModbusDevice::NoError) {
-        const QModbusDataUnit unit = reply->result();
-        if (unit.value(0)) {
-            readData();
-        }
-    } else {
-        qDebug("Read ready bit response error: %d\n", reply->error());
-    }
-
-    reply->deleteLater();
 }
 
 void MainWindow::readData()

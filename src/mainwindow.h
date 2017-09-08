@@ -32,15 +32,12 @@ private:
     QChart *chart;
     QModbusRtuSerialMaster *modbusDevice;
     QModbusDataUnit *dataUnit;
-    QModbusDataUnit *dataReadyUnit;
     QTimer *timer;
     qreal counter = 0;
 
     void toggleGroupBox(QGroupBox* group, bool enable);
 
 private slots:
-    void readReadyBit();
-    void readReadyBitReady();
     void readData();
     void readDataReady();
     void on_radio_live_raw_toggled(bool checked);
