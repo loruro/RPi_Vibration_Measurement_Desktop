@@ -32,6 +32,8 @@ private:
     QChart *chart;
     QModbusRtuSerialMaster *modbusDevice;
     QModbusDataUnit *dataUnit;
+    QModbusDataUnit *failureUnit; // Test
+    QTimer *failureTimer; // Test
     QTimer *timer;
     qreal counter = 0;
 
@@ -40,6 +42,8 @@ private:
 private slots:
     void readData();
     void readDataReady();
+    void readFailure(); // Test
+    void readFailureReady(); // Test
     void on_radio_live_raw_toggled(bool checked);
     void on_radio_live_proc_toggled(bool checked);
     void on_radio_record_raw_toggled(bool checked);

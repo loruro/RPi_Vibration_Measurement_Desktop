@@ -46,10 +46,15 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
+    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 1); // Test
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(readData()));
     timer->start(200);
+
+    failureTimer = new QTimer(this);
+    connect(failureTimer, SIGNAL(timeout()), this, SLOT(readFailure()));
+    failureTimer->start(5000);
 }
 
 MainWindow::~MainWindow()
@@ -115,6 +120,34 @@ void MainWindow::readDataReady()
 
     } else {
         qDebug("Read data response error: %d\n", reply->error());
+    }
+
+    reply->deleteLater();
+}
+
+void MainWindow::readFailure()
+{
+    if (auto *reply = modbusDevice->sendReadRequest(*failureUnit, 0x0A)) {
+        if (!reply->isFinished())
+            connect(reply, &QModbusReply::finished, this, &MainWindow::readFailureReady);
+        else
+            delete reply; // broadcast replies return immediately
+    } else {
+        qDebug("Read error\n");
+    }
+}
+
+void MainWindow::readFailureReady()
+{
+    auto reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply)
+        return;
+
+    if (reply->error() == QModbusDevice::NoError) {
+        const QModbusDataUnit unit = reply->result();
+        statusBar()->showMessage(QString("Failures: %1").arg(QString::number(unit.value(0))));
+    } else {
+        qDebug("Read failure response error: %d\n", reply->error());
     }
 
     reply->deleteLater();
