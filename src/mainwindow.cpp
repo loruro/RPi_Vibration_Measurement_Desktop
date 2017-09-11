@@ -1,12 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QSerialPort>
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    qRegisterMetaType<QList<QPointF>>("QList<QPointF>");
     ui->setupUi(this);
     statusBar()->showMessage(QString("Status: OK"));
     toggleGroupBox(ui->group_live_proc, false);
@@ -34,27 +33,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->chart->setChart(chart);
     ui->chart->setRenderHint(QPainter::Antialiasing);
 
-    modbusDevice = new QModbusRtuSerialMaster(this);
-    modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter, "COM4");
-    modbusDevice->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::NoParity);
-    modbusDevice->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, QSerialPort::Baud115200);
-    modbusDevice->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, QSerialPort::Data8);
-    modbusDevice->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, QSerialPort::OneStop);
-    modbusDevice->setTimeout(500);
-    if (!modbusDevice->connectDevice()) {
-        qDebug("Connect failed\n");
-    }
-
-    dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
-    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 1); // Test
-
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(readData()));
-    timer->start(200);
-
-    failureTimer = new QTimer(this);
-    connect(failureTimer, SIGNAL(timeout()), this, SLOT(readFailure()));
-    failureTimer->start(5000);
+    modbusManager = new ModbusManager();
+    modbusManager->moveToThread(&modbusThread);
+    connect(modbusManager, &ModbusManager::updateChart, this, &MainWindow::updateChart);
+    connect(modbusManager, &ModbusManager::updateStatusBar, this, &MainWindow::updateStatusBar);
+    connect(&modbusThread, SIGNAL (started()), modbusManager, SLOT (start()));
+    modbusThread.start();
 }
 
 MainWindow::~MainWindow()
@@ -70,87 +54,6 @@ void MainWindow::toggleGroupBox(QGroupBox *group, bool enable)
             widget->setEnabled(enable);
         }
     }
-}
-
-void MainWindow::readData()
-{
-    if (auto *reply = modbusDevice->sendReadRequest(*dataUnit, 0x0A)) {
-        if (!reply->isFinished())
-            connect(reply, &QModbusReply::finished, this, &MainWindow::readDataReady);
-        else
-            delete reply; // broadcast replies return immediately
-    } else {
-        qDebug("Read error\n");
-    }
-}
-
-void MainWindow::readDataReady()
-{
-    auto reply = qobject_cast<QModbusReply *>(sender());
-    if (!reply)
-        return;
-
-    if (reply->error() == QModbusDevice::NoError) {
-        QList<QPointF> datapointListX;
-        QList<QPointF> datapointListY;
-        QList<QPointF> datapointListZ;
-        const QModbusDataUnit unit = reply->result();
-        for (int i = 0; i < bufferLength; i++) {
-            float dataX, dataY, dataZ;
-            *((uint16_t *)&dataX + 0) = unit.value(i * 2 + 0 + 0);
-            *((uint16_t *)&dataX + 1) = unit.value(i * 2 + 0 + 1);
-            *((uint16_t *)&dataY + 0) = unit.value(i * 2 + 40 + 0);
-            *((uint16_t *)&dataY + 1) = unit.value(i * 2 + 40 + 1);
-            *((uint16_t *)&dataZ + 0) = unit.value(i * 2 + 80 + 0);
-            *((uint16_t *)&dataZ + 1) = unit.value(i * 2 + 80 + 1);
-            datapointListX.append(QPointF(counter, dataX));
-            datapointListY.append(QPointF(counter, dataY));
-            datapointListZ.append(QPointF(counter, dataZ));
-            counter+=0.01;
-        }
-        seriesX->append(datapointListX);
-        seriesY->append(datapointListY);
-        seriesZ->append(datapointListZ);
-        if (counter > xSeriesLength) {
-            chart->axisX()->setRange(counter - xSeriesLength, counter);
-            seriesX->removePoints(0, 20);
-            seriesY->removePoints(0, 20);
-            seriesZ->removePoints(0, 20);
-        }
-
-    } else {
-        qDebug("Read data response error: %d\n", reply->error());
-    }
-
-    reply->deleteLater();
-}
-
-void MainWindow::readFailure()
-{
-    if (auto *reply = modbusDevice->sendReadRequest(*failureUnit, 0x0A)) {
-        if (!reply->isFinished())
-            connect(reply, &QModbusReply::finished, this, &MainWindow::readFailureReady);
-        else
-            delete reply; // broadcast replies return immediately
-    } else {
-        qDebug("Read error\n");
-    }
-}
-
-void MainWindow::readFailureReady()
-{
-    auto reply = qobject_cast<QModbusReply *>(sender());
-    if (!reply)
-        return;
-
-    if (reply->error() == QModbusDevice::NoError) {
-        const QModbusDataUnit unit = reply->result();
-        statusBar()->showMessage(QString("Failures: %1").arg(QString::number(unit.value(0))));
-    } else {
-        qDebug("Read failure response error: %d\n", reply->error());
-    }
-
-    reply->deleteLater();
 }
 
 void MainWindow::on_radio_live_raw_toggled(bool checked)
@@ -183,4 +86,22 @@ void MainWindow::on_button_stop_clicked()
 {
     ui->button_start->setEnabled(true);
     ui->button_stop->setEnabled(false);
+}
+
+void MainWindow::updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ, qreal counter)
+{
+    seriesX->append(dataX);
+    seriesY->append(dataY);
+    seriesZ->append(dataZ);
+    if (counter > xSeriesLength) {
+        chart->axisX()->setRange(counter - xSeriesLength, counter);
+        seriesX->removePoints(0, 20);
+        seriesY->removePoints(0, 20);
+        seriesZ->removePoints(0, 20);
+    }
+}
+
+void MainWindow::updateStatusBar(quint16 failures)
+{
+    statusBar()->showMessage(QString("Failures: %1").arg(QString::number(failures)));
 }
