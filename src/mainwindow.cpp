@@ -101,7 +101,7 @@ void MainWindow::updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<Q
     }
 }
 
-void MainWindow::updateStatusBar(quint16 failures)
+void MainWindow::updateStatusBar(quint16 fifoOverrunRpi, quint16 fifoOverrunAdxl)
 {
-    statusBar()->showMessage(QString("Failures: %1").arg(QString::number(failures)));
+    statusBar()->showMessage(QString("FIFO Overrun. RPi: %1   ADXL: %2").arg(QString::number(fifoOverrunRpi)).arg(QString::number(fifoOverrunAdxl)));
 }

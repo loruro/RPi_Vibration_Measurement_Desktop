@@ -7,7 +7,7 @@
 ModbusManager::ModbusManager(QObject *parent) : QObject(parent)
 {
     dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
-    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 1); // Test
+    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 2); // Test
 
     timer = new QTimer(this);
     failureTimer = new QTimer(this);
@@ -97,7 +97,7 @@ void ModbusManager::readFailureReady()
 
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
-        emit updateStatusBar(unit.value(0));
+        emit updateStatusBar(unit.value(0), unit.value(1));
     } else {
         qDebug("Read failure response error: %d\n", reply->error());
     }
