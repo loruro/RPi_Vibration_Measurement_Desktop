@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     chart->addSeries(seriesZ);
     chart->createDefaultAxes();
     chart->axisX()->setRange(0,30);
-    chart->axisY()->setRange(-2, 2);
+    chart->axisY()->setRange(-16, 16);
     chart->axisX()->setTitleText("Time [s]");
     chart->axisY()->setTitleText("Acceleration [g]");
     chart->setTitle("Data");
