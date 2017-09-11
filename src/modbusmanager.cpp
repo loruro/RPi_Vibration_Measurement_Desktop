@@ -6,7 +6,13 @@
 
 ModbusManager::ModbusManager(QObject *parent) : QObject(parent)
 {
+    dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
+    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 1); // Test
 
+    timer = new QTimer(this);
+    failureTimer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(readData()));
+    connect(failureTimer, SIGNAL(timeout()), this, SLOT(readFailure()));
 }
 
 void ModbusManager::start()
@@ -22,15 +28,7 @@ void ModbusManager::start()
         qDebug("Connect failed\n");
     }
 
-    dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
-    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 1); // Test
-
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(readData()));
     timer->start(150);
-
-    failureTimer = new QTimer(this);
-    connect(failureTimer, SIGNAL(timeout()), this, SLOT(readFailure()));
     failureTimer->start(5000);
 }
 
