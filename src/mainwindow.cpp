@@ -23,6 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
     seriesY = new QLineSeries(this);
     seriesZ = new QLineSeries(this);
     seriesTemperature = new QLineSeries(this);
+    seriesX->setUseOpenGL(true);
+    seriesY->setUseOpenGL(true);
+    seriesZ->setUseOpenGL(true);
+    seriesTemperature->setUseOpenGL(true);
     seriesX->setName("X axis");
     seriesY->setName("Y axis");
     seriesZ->setName("Z axis");
