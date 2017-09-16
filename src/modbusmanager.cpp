@@ -7,11 +7,16 @@
 ModbusManager::ModbusManager(QObject *parent) : QObject(parent)
 {
     dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
+    temperatureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 122, 2);
     failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 2); // Test
 
     timer = new QTimer(this);
+    temperatureTimer = new QTimer(this);
     failureTimer = new QTimer(this);
+    timer->setTimerType(Qt::PreciseTimer);
+    temperatureTimer->setTimerType(Qt::PreciseTimer);
     connect(timer, SIGNAL(timeout()), this, SLOT(readData()));
+    connect(temperatureTimer, SIGNAL(timeout()), this, SLOT(readTemperature()));
     connect(failureTimer, SIGNAL(timeout()), this, SLOT(readFailure()));
 }
 
@@ -23,12 +28,13 @@ void ModbusManager::start()
     modbusDevice->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, QSerialPort::Baud115200);
     modbusDevice->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, QSerialPort::Data8);
     modbusDevice->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, QSerialPort::OneStop);
-    modbusDevice->setTimeout(500);
+    modbusDevice->setTimeout(1000);
     if (!modbusDevice->connectDevice()) {
         qDebug("Connect failed\n");
     }
 
-    timer->start(150);
+    timer->start(200);
+    temperatureTimer->start(1000);
     failureTimer->start(5000);
 }
 
@@ -70,6 +76,38 @@ void ModbusManager::readDataReady()
         }
         emit updateChart(datapointListX, datapointListY, datapointListZ);
 
+    } else {
+        qDebug("Read data response error: %d\n", reply->error());
+    }
+
+    reply->deleteLater();
+}
+
+void ModbusManager::readTemperature()
+{
+    if (auto *reply = modbusDevice->sendReadRequest(*temperatureUnit, 0x0A)) {
+        if (!reply->isFinished())
+            connect(reply, &QModbusReply::finished, this, &ModbusManager::readTemperatureReady);
+        else
+            delete reply; // broadcast replies return immediately
+    } else {
+        qDebug("Read error\n");
+    }
+}
+
+void ModbusManager::readTemperatureReady()
+{
+    auto reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply)
+        return;
+
+    if (reply->error() == QModbusDevice::NoError) {
+        float temperature;
+        const QModbusDataUnit unit = reply->result();
+        *((uint16_t *)&temperature + 0) = unit.value(0);
+        *((uint16_t *)&temperature + 1) = unit.value(1);
+        emit updateTemperatureSeries(counterTemperature, temperature);
+        counterTemperature += 1;
     } else {
         qDebug("Read data response error: %d\n", reply->error());
     }
