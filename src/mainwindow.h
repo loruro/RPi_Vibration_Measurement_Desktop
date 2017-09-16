@@ -42,7 +42,7 @@ private slots:
     void on_radio_record_proc_toggled(bool checked);
     void on_button_start_clicked();
     void on_button_stop_clicked();
-    void updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ, qreal counter);
+    void updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ);
     void updateStatusBar(quint16 fifoOverrunRpi, quint16 fifoOverrunAdxl); // Test
 };
 

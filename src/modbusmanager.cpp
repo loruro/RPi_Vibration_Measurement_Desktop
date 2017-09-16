@@ -68,7 +68,7 @@ void ModbusManager::readDataReady()
             datapointListZ.append(QPointF(counter, dataZ));
             counter+=0.01;
         }
-        emit updateChart(datapointListX, datapointListY, datapointListZ, counter);
+        emit updateChart(datapointListX, datapointListY, datapointListZ);
 
     } else {
         qDebug("Read data response error: %d\n", reply->error());

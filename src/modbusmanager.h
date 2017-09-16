@@ -26,7 +26,7 @@ private:
     qreal counter = 0;
 
 signals:
-    void updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ, qreal counter);
+    void updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ);
     void updateStatusBar(quint16 fifoOverrunRpi, quint16 fifoOverrunAdxl); // Test
 
 private slots:

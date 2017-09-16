@@ -88,8 +88,9 @@ void MainWindow::on_button_stop_clicked()
     ui->button_stop->setEnabled(false);
 }
 
-void MainWindow::updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ, qreal counter)
+void MainWindow::updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ)
 {
+    qreal counter = dataX.last().x();
     seriesX->append(dataX);
     seriesY->append(dataY);
     seriesZ->append(dataZ);
