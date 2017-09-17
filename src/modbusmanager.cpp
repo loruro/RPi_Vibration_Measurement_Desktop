@@ -7,15 +7,19 @@
 ModbusManager::ModbusManager(QObject *parent) : QObject(parent)
 {
     dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
-    temperatureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 122, 2);
-    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 2); // Test
+    dataProcessedUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 242, 24);
+    temperatureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 266, 2);
+    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 3); // Test
 
     timer = new QTimer(this);
+    processedTimer = new QTimer(this);
     temperatureTimer = new QTimer(this);
     failureTimer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
+    processedTimer->setTimerType(Qt::PreciseTimer);
     temperatureTimer->setTimerType(Qt::PreciseTimer);
     connect(timer, SIGNAL(timeout()), this, SLOT(readData()));
+    connect(processedTimer, SIGNAL(timeout()), this, SLOT(readProcessedData()));
     connect(temperatureTimer, SIGNAL(timeout()), this, SLOT(readTemperature()));
     connect(failureTimer, SIGNAL(timeout()), this, SLOT(readFailure()));
 }
@@ -33,8 +37,9 @@ void ModbusManager::start()
         qDebug("Connect failed\n");
     }
 
-    timer->start(200);
-    temperatureTimer->start(1000);
+//    timer->start(200);
+    processedTimer->start(100);
+//    temperatureTimer->start(1000);
     failureTimer->start(5000);
 }
 
@@ -78,6 +83,42 @@ void ModbusManager::readDataReady()
 
     } else {
         qDebug("Read data response error: %d\n", reply->error());
+    }
+
+    reply->deleteLater();
+}
+
+void ModbusManager::readProcessedData()
+{
+    if (auto *reply = modbusDevice->sendReadRequest(*dataProcessedUnit, 0x0A)) {
+        if (!reply->isFinished())
+            connect(reply, &QModbusReply::finished, this, &ModbusManager::readProcessedDataReady);
+        else
+            delete reply; // broadcast replies return immediately
+    } else {
+        qDebug("Read error\n");
+    }
+}
+
+void ModbusManager::readProcessedDataReady()
+{
+    auto reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply)
+        return;
+
+    if (reply->error() == QModbusDevice::NoError) {
+        QList<QPointF> datapointList;
+        const QModbusDataUnit unit = reply->result();
+        for (int i = 0; i < 12; ++i) {
+            float sample;
+            *((uint16_t *)&sample + 0) = unit.value(i * 2 + 0);
+            *((uint16_t *)&sample + 1) = unit.value(i * 2 + 1);
+            datapointList.append(QPointF(counterProcessed, sample));
+        }
+        emit updateProcessedSeries(datapointList);
+        counterProcessed += 0.1;
+    } else {
+        qDebug("Read processed data response error: %d\n", reply->error());
     }
 
     reply->deleteLater();
@@ -135,7 +176,7 @@ void ModbusManager::readFailureReady()
 
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
-        emit updateStatusBar(unit.value(0), unit.value(1));
+        emit updateStatusBar(unit.value(0), unit.value(1), unit.value(2));
     } else {
         qDebug("Read failure response error: %d\n", reply->error());
     }
