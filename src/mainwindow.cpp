@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    temperatureAxis->setRange(-20, 100);
 //    temperatureAxis->setTitleText("Temperature [°C]");
 
+    /*******/
 //    seriesX = new QLineSeries(this);
 //    seriesY = new QLineSeries(this);
 //    seriesZ = new QLineSeries(this);
@@ -40,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    chart->addSeries(seriesTemperature);
 //    chart->addAxis(temperatureAxis, Qt::AlignRight);
 //    chart->axisX()->setRange(0, 30);
-//    chart->axisY()->setRange(-16, 16);
+//    chart->axisY()->setRange(-16000, 16000);
 //    static_cast<QValueAxis *>(chart->axisX())->setTickCount(7);
 //    static_cast<QValueAxis *>(chart->axisY())->setTickCount(9);
 //    chart->axisX()->setTitleText("Time [s]");
@@ -50,7 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
 //    seriesTemperature->attachAxis(chart->axisX());
 //    seriesTemperature->attachAxis(temperatureAxis);
 //    seriesTemperature->setColor(Qt::red);
+    /********/
 
+    /********/
     axisX = new QValueAxis(this);
     axisX->setTickCount(7);
     axisX->setRange(0, 30);
@@ -61,15 +64,15 @@ MainWindow::MainWindow(QWidget *parent) :
     axisRMS->setTitleText("aaa");
     axisVRMS = new QValueAxis(this);
     axisVRMS->setTickCount(9);
-    axisVRMS->setRange(-16, 16);
+    axisVRMS->setRange(-16000, 16000);
     axisVRMS->setTitleText("aaa");
     axisPP = new QValueAxis(this);
     axisPP->setTickCount(9);
-    axisPP->setRange(-16, 16);
+    axisPP->setRange(0, 32);
     axisPP->setTitleText("aaa");
     axisKurt = new QValueAxis(this);
     axisKurt->setTickCount(9);
-    axisKurt->setRange(-16, 16);
+    axisKurt->setRange(0, 32);
     axisKurt->setTitleText("aaa");
 
     seriesRMSX = new QLineSeries(this);
@@ -153,6 +156,7 @@ MainWindow::MainWindow(QWidget *parent) :
     seriesKurtY->attachAxis(axisKurt);
     seriesKurtZ->attachAxis(chart->axisX());
     seriesKurtZ->attachAxis(axisKurt);
+    /********/
 
     ui->chart->setChart(chart);
     ui->chart->setRenderHint(QPainter::Antialiasing);
