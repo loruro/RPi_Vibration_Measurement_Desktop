@@ -67,7 +67,7 @@ private slots:
     void updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ);
     void updateProcessedSeries(QList<QPointF> samples);
     void updateTemperatureSeries(qreal x, qreal y);
-    void updateStatusBar(quint16 fifoOverrunRpi, quint16 fifoOverrunAdxl, quint16 fifoOverrunProcessed); // Test
+    void updateStatusBar(quint16 fifoOverrunAdxl, quint16 fifoOverrunRawA, quint16 fifoOverrunRawB, quint16 fifoOverrunVelocity, quint16 fifoOverrunProcessed); // Test
 };
 
 #endif // MAINWINDOW_H

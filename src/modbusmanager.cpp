@@ -9,7 +9,7 @@ ModbusManager::ModbusManager(QObject *parent) : QObject(parent)
     dataUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 2, 6 * bufferLength);
     dataProcessedUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 242, 24);
     temperatureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 266, 2);
-    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 3); // Test
+    failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 5); // Test
 
     timer = new QTimer(this);
     processedTimer = new QTimer(this);
@@ -176,7 +176,7 @@ void ModbusManager::readFailureReady()
 
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
-        emit updateStatusBar(unit.value(0), unit.value(1), unit.value(2));
+        emit updateStatusBar(unit.value(0), unit.value(1), unit.value(2), unit.value(3), unit.value(4));
     } else {
         qDebug("Read failure response error: %d\n", reply->error());
     }

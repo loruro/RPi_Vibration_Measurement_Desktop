@@ -268,7 +268,7 @@ void MainWindow::updateTemperatureSeries(qreal x, qreal y)
     }
 }
 
-void MainWindow::updateStatusBar(quint16 fifoOverrunRpi, quint16 fifoOverrunAdxl, quint16 fifoOverrunProcessed)
+void MainWindow::updateStatusBar(quint16 fifoOverrunAdxl, quint16 fifoOverrunRawA, quint16 fifoOverrunRawB, quint16 fifoOverrunVelocity, quint16 fifoOverrunProcessed)
 {
-    statusBar()->showMessage(QString("FIFO Overrun. RPi: %1   ADXL: %2   Processing: %3").arg(QString::number(fifoOverrunRpi)).arg(QString::number(fifoOverrunAdxl)).arg(QString::number(fifoOverrunProcessed)));
+    statusBar()->showMessage(QString("FIFO Overrun. ADXL: %1   RawA: %2   RawB: %3   Velocity: %4   Processing: %5").arg(QString::number(fifoOverrunAdxl)).arg(QString::number(fifoOverrunRawA)).arg(QString::number(fifoOverrunRawB)).arg(QString::number(fifoOverrunVelocity)).arg(QString::number(fifoOverrunProcessed)));
 }
