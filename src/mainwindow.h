@@ -23,6 +23,10 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+signals:
+    void start(int mode, int rawOrVel, double step, int recordTime);
+    void stop();
+
 private:
     const qreal xSeriesLength = 30.0;
 
@@ -34,9 +38,10 @@ private:
     QLineSeries *seriesX;
     QLineSeries *seriesY;
     QLineSeries *seriesZ;
+    QLineSeries *seriesVelocityX;
+    QLineSeries *seriesVelocityY;
+    QLineSeries *seriesVelocityZ;
     QLineSeries *seriesTemperature;
-    QValueAxis *temperatureAxis;
-
     QLineSeries *seriesRMSX;
     QLineSeries *seriesRMSY;
     QLineSeries *seriesRMSZ;
@@ -50,12 +55,21 @@ private:
     QLineSeries *seriesKurtY;
     QLineSeries *seriesKurtZ;
     QValueAxis *axisX;
+    QValueAxis *axisRaw;
+    QValueAxis *axisVelocity;
+    QValueAxis *temperatureAxis;
     QValueAxis *axisRMS;
     QValueAxis *axisVRMS;
     QValueAxis *axisPP;
     QValueAxis *axisKurt;
 
+    int mode = 0;
+
     void toggleGroupBox(QGroupBox* group, bool enable);
+    void clearSeries();
+    void clearChart();
+    void setChartA();
+    void setChartB();
 
 private slots:
     void on_radio_live_raw_toggled(bool checked);
@@ -64,7 +78,7 @@ private slots:
     void on_radio_record_proc_toggled(bool checked);
     void on_button_start_clicked();
     void on_button_stop_clicked();
-    void updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ);
+    void updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ, bool rawOrVel);
     void updateProcessedSeries(QList<QPointF> samples);
     void updateTemperatureSeries(qreal x, qreal y);
     void updateStatusBar(quint16 fifoOverrunAdxl, quint16 fifoOverrunRawA, quint16 fifoOverrunRawB, quint16 fifoOverrunVelocity, quint16 fifoOverrunProcessed); // Test

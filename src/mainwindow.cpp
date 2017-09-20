@@ -3,6 +3,8 @@
 
 #include <QDebug>
 
+// TODO: Cleanup!!!
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -14,67 +16,46 @@ MainWindow::MainWindow(QWidget *parent) :
     toggleGroupBox(ui->group_record_raw, false);
     toggleGroupBox(ui->group_record_proc, false);
 
-//    temperatureAxis = new QValueAxis(this);
-//    temperatureAxis->setTickCount(9);
-//    temperatureAxis->setRange(-20, 100);
-//    temperatureAxis->setTitleText("Temperature [°C]");
-
-    /*******/
-//    seriesX = new QLineSeries(this);
-//    seriesY = new QLineSeries(this);
-//    seriesZ = new QLineSeries(this);
-//    seriesTemperature = new QLineSeries(this);
-//    seriesX->setUseOpenGL(true);
-//    seriesY->setUseOpenGL(true);
-//    seriesZ->setUseOpenGL(true);
-//    seriesTemperature->setUseOpenGL(true);
-//    seriesX->setName("X axis");
-//    seriesY->setName("Y axis");
-//    seriesZ->setName("Z axis");
-//    seriesTemperature->setName("Temperature");
-
-//    chart = new QChart();
-//    chart->addSeries(seriesX);
-//    chart->addSeries(seriesY);
-//    chart->addSeries(seriesZ);
-//    chart->createDefaultAxes();
-//    chart->addSeries(seriesTemperature);
-//    chart->addAxis(temperatureAxis, Qt::AlignRight);
-//    chart->axisX()->setRange(0, 30);
-//    chart->axisY()->setRange(-16000, 16000);
-//    static_cast<QValueAxis *>(chart->axisX())->setTickCount(7);
-//    static_cast<QValueAxis *>(chart->axisY())->setTickCount(9);
-//    chart->axisX()->setTitleText("Time [s]");
-//    chart->axisY()->setTitleText("Acceleration [g]");
-//    chart->setTitle("Data");
-
-//    seriesTemperature->attachAxis(chart->axisX());
-//    seriesTemperature->attachAxis(temperatureAxis);
-//    seriesTemperature->setColor(Qt::red);
-    /********/
-
-    /********/
     axisX = new QValueAxis(this);
     axisX->setTickCount(7);
     axisX->setRange(0, 30);
     axisX->setTitleText("Time [s]");
+    axisRaw = new QValueAxis(this);
+    axisRaw->setTickCount(9);
+    axisRaw->setRange(-16, 16);
+    axisRaw->setTitleText("Acceleration [g]");
+    axisVelocity = new QValueAxis(this);
+    axisVelocity->setTickCount(9);
+    axisVelocity->setRange(-16000, 16000);
+    axisVelocity->setTitleText("Velocity [mm/s]");
+    temperatureAxis = new QValueAxis(this);
+    temperatureAxis->setTickCount(9);
+    temperatureAxis->setRange(-20, 100);
+    temperatureAxis->setTitleText("Temperature [°C]");
     axisRMS = new QValueAxis(this);
     axisRMS->setTickCount(9);
     axisRMS->setRange(-16, 16);
-    axisRMS->setTitleText("aaa");
+    axisRMS->setTitleText("RMS [g]");
     axisVRMS = new QValueAxis(this);
     axisVRMS->setTickCount(9);
     axisVRMS->setRange(-16000, 16000);
-    axisVRMS->setTitleText("aaa");
+    axisVRMS->setTitleText("VRMS [mm/s]");
     axisPP = new QValueAxis(this);
     axisPP->setTickCount(9);
     axisPP->setRange(0, 32);
-    axisPP->setTitleText("aaa");
+    axisPP->setTitleText("Peak-to-peak [g]");
     axisKurt = new QValueAxis(this);
     axisKurt->setTickCount(9);
     axisKurt->setRange(0, 32);
-    axisKurt->setTitleText("aaa");
+    axisKurt->setTitleText("Kurtosis");
 
+    seriesX = new QLineSeries(this);
+    seriesY = new QLineSeries(this);
+    seriesZ = new QLineSeries(this);
+    seriesVelocityX = new QLineSeries(this);
+    seriesVelocityY = new QLineSeries(this);
+    seriesVelocityZ = new QLineSeries(this);
+    seriesTemperature = new QLineSeries(this);
     seriesRMSX = new QLineSeries(this);
     seriesRMSY = new QLineSeries(this);
     seriesRMSZ = new QLineSeries(this);
@@ -87,6 +68,13 @@ MainWindow::MainWindow(QWidget *parent) :
     seriesKurtX = new QLineSeries(this);
     seriesKurtY = new QLineSeries(this);
     seriesKurtZ = new QLineSeries(this);
+    seriesX->setUseOpenGL(true);
+    seriesY->setUseOpenGL(true);
+    seriesZ->setUseOpenGL(true);
+    seriesVelocityX->setUseOpenGL(true);
+    seriesVelocityY->setUseOpenGL(true);
+    seriesVelocityZ->setUseOpenGL(true);
+    seriesTemperature->setUseOpenGL(true);
     seriesRMSX->setUseOpenGL(true);
     seriesRMSY->setUseOpenGL(true);
     seriesRMSZ->setUseOpenGL(true);
@@ -99,20 +87,156 @@ MainWindow::MainWindow(QWidget *parent) :
     seriesKurtX->setUseOpenGL(true);
     seriesKurtY->setUseOpenGL(true);
     seriesKurtZ->setUseOpenGL(true);
-    seriesRMSX->setName("X axis");
-    seriesRMSY->setName("Y axis");
-    seriesRMSZ->setName("Z axis");
-    seriesVRMSX->setName("X axis");
-    seriesVRMSY->setName("Y axis");
-    seriesVRMSZ->setName("Z axis");
-    seriesPPX->setName("X axis");
-    seriesPPY->setName("Y axis");
-    seriesPPZ->setName("Z axis");
-    seriesKurtX->setName("X axis");
-    seriesKurtY->setName("Y axis");
-    seriesKurtZ->setName("Z axis");
+    seriesX->setName("Acceleration X axis");
+    seriesY->setName("Acceleration Y axis");
+    seriesZ->setName("Acceleration Z axis");
+    seriesVelocityX->setName("Velocity X axis");
+    seriesVelocityY->setName("Velocity Y axis");
+    seriesVelocityZ->setName("Velocity Z axis");
+    seriesTemperature->setName("Temperature");
+    seriesRMSX->setName("RMS X axis");
+    seriesRMSY->setName("RMS Y axis");
+    seriesRMSZ->setName("RMS Z axis");
+    seriesVRMSX->setName("VRMS X axis");
+    seriesVRMSY->setName("VRMS Y axis");
+    seriesVRMSZ->setName("VRMS Z axis");
+    seriesPPX->setName("Peak-to-peak X axis");
+    seriesPPY->setName("Peak-to-peak Y axis");
+    seriesPPZ->setName("Peak-to-peak Z axis");
+    seriesKurtX->setName("Kurtosis X axis");
+    seriesKurtY->setName("Kurtosis Y axis");
+    seriesKurtZ->setName("Kurtosis Z axis");
 
     chart = new QChart();
+    chart->addSeries(seriesX);
+    chart->addSeries(seriesY);
+    chart->addSeries(seriesZ);
+    chart->addSeries(seriesVelocityX);
+    chart->addSeries(seriesVelocityY);
+    chart->addSeries(seriesVelocityZ);
+    chart->addSeries(seriesTemperature);
+    chart->addAxis(axisX, Qt::AlignBottom);
+    chart->addAxis(axisRaw, Qt::AlignLeft);
+    chart->addAxis(axisVelocity, Qt::AlignLeft);
+    chart->addAxis(temperatureAxis, Qt::AlignRight);
+    chart->setTitle("Data");
+
+    seriesX->attachAxis(chart->axisX());
+    seriesX->attachAxis(axisRaw);
+    seriesY->attachAxis(chart->axisX());
+    seriesY->attachAxis(axisRaw);
+    seriesZ->attachAxis(chart->axisX());
+    seriesZ->attachAxis(axisRaw);
+    seriesVelocityX->attachAxis(chart->axisX());
+    seriesVelocityX->attachAxis(axisVelocity);
+    seriesVelocityY->attachAxis(chart->axisX());
+    seriesVelocityY->attachAxis(axisVelocity);
+    seriesVelocityZ->attachAxis(chart->axisX());
+    seriesVelocityZ->attachAxis(axisVelocity);
+    seriesTemperature->attachAxis(chart->axisX());
+    seriesTemperature->attachAxis(temperatureAxis);
+    seriesTemperature->setColor(Qt::red);
+
+    ui->chart->setChart(chart);
+    ui->chart->setRenderHint(QPainter::Antialiasing);
+
+    modbusManager = new ModbusManager();
+    modbusManager->moveToThread(&modbusThread);
+    connect(modbusManager, &ModbusManager::updateChart, this, &MainWindow::updateChart);
+    connect(modbusManager, &ModbusManager::updateProcessedSeries, this, &MainWindow::updateProcessedSeries);
+    connect(modbusManager, &ModbusManager::updateTemperatureSeries, this, &MainWindow::updateTemperatureSeries);
+    connect(modbusManager, &ModbusManager::updateStatusBar, this, &MainWindow::updateStatusBar);
+    connect(this, &MainWindow::start, modbusManager, &ModbusManager::start);
+    connect(this, &MainWindow::stop, modbusManager, &ModbusManager::stop);
+    connect(&modbusThread, SIGNAL (started()), modbusManager, SLOT (connectToDevice()));
+    modbusThread.start();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::toggleGroupBox(QGroupBox *group, bool enable)
+{
+    foreach (QObject *object, group->children()) {
+        QWidget *widget = dynamic_cast<QWidget*>(object);
+        if (widget) {
+            widget->setEnabled(enable);
+        }
+    }
+}
+
+void MainWindow::clearSeries()
+{
+    axisX->setRange(0, 30.0);
+    seriesX->clear();
+    seriesY->clear();
+    seriesZ->clear();
+    seriesVelocityX->clear();
+    seriesVelocityY->clear();
+    seriesVelocityZ->clear();
+    seriesTemperature->clear();
+    seriesRMSX->clear();
+    seriesRMSY->clear();
+    seriesRMSZ->clear();
+    seriesVRMSX->clear();
+    seriesVRMSY->clear();
+    seriesVRMSZ->clear();
+    seriesPPX->clear();
+    seriesPPY->clear();
+    seriesPPZ->clear();
+    seriesKurtX->clear();
+    seriesKurtY->clear();
+    seriesKurtZ->clear();
+}
+
+void MainWindow::clearChart()
+{
+    clearSeries();
+    foreach (QAbstractSeries *series, chart->series()) {
+        chart->removeSeries(series);
+    }
+    foreach (QAbstractAxis *axis, chart->axes()) {
+        chart->removeAxis(axis);
+    }
+}
+
+void MainWindow::setChartA()
+{
+    clearChart();
+    chart->addSeries(seriesX);
+    chart->addSeries(seriesY);
+    chart->addSeries(seriesZ);
+    chart->addSeries(seriesVelocityX);
+    chart->addSeries(seriesVelocityY);
+    chart->addSeries(seriesVelocityZ);
+    chart->addSeries(seriesTemperature);
+    chart->addAxis(axisX, Qt::AlignBottom);
+    chart->addAxis(axisRaw, Qt::AlignLeft);
+    chart->addAxis(axisVelocity, Qt::AlignLeft);
+    chart->addAxis(temperatureAxis, Qt::AlignRight);
+    seriesX->attachAxis(chart->axisX());
+    seriesX->attachAxis(axisRaw);
+    seriesY->attachAxis(chart->axisX());
+    seriesY->attachAxis(axisRaw);
+    seriesZ->attachAxis(chart->axisX());
+    seriesZ->attachAxis(axisRaw);
+    seriesVelocityX->attachAxis(chart->axisX());
+    seriesVelocityX->attachAxis(axisVelocity);
+    seriesVelocityY->attachAxis(chart->axisX());
+    seriesVelocityY->attachAxis(axisVelocity);
+    seriesVelocityZ->attachAxis(chart->axisX());
+    seriesVelocityZ->attachAxis(axisVelocity);
+    seriesTemperature->attachAxis(chart->axisX());
+    seriesTemperature->attachAxis(temperatureAxis);
+//    seriesTemperature->setColor(Qt::red);
+}
+
+void MainWindow::setChartB()
+{
+    clearChart();
+
     chart->addSeries(seriesRMSX);
     chart->addSeries(seriesRMSY);
     chart->addSeries(seriesRMSZ);
@@ -130,8 +254,6 @@ MainWindow::MainWindow(QWidget *parent) :
     chart->addAxis(axisVRMS, Qt::AlignLeft);
     chart->addAxis(axisPP, Qt::AlignLeft);
     chart->addAxis(axisKurt, Qt::AlignLeft);
-    chart->setTitle("Data");
-
     seriesRMSX->attachAxis(chart->axisX());
     seriesRMSX->attachAxis(axisRMS);
     seriesRMSY->attachAxis(chart->axisX());
@@ -156,79 +278,88 @@ MainWindow::MainWindow(QWidget *parent) :
     seriesKurtY->attachAxis(axisKurt);
     seriesKurtZ->attachAxis(chart->axisX());
     seriesKurtZ->attachAxis(axisKurt);
-    /********/
-
-    ui->chart->setChart(chart);
-    ui->chart->setRenderHint(QPainter::Antialiasing);
-
-    modbusManager = new ModbusManager();
-    modbusManager->moveToThread(&modbusThread);
-    connect(modbusManager, &ModbusManager::updateChart, this, &MainWindow::updateChart);
-    connect(modbusManager, &ModbusManager::updateProcessedSeries, this, &MainWindow::updateProcessedSeries);
-    connect(modbusManager, &ModbusManager::updateTemperatureSeries, this, &MainWindow::updateTemperatureSeries);
-    connect(modbusManager, &ModbusManager::updateStatusBar, this, &MainWindow::updateStatusBar);
-    connect(&modbusThread, SIGNAL (started()), modbusManager, SLOT (start()));
-    modbusThread.start();
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
-
-void MainWindow::toggleGroupBox(QGroupBox *group, bool enable)
-{
-    foreach (QObject *object, group->children()) {
-        QWidget *widget = dynamic_cast<QWidget*>(object);
-        if (widget) {
-            widget->setEnabled(enable);
-        }
-    }
 }
 
 void MainWindow::on_radio_live_raw_toggled(bool checked)
 {
     toggleGroupBox(ui->group_live_raw, checked);
+    if (checked){
+        setChartA();
+        mode = 0;
+    }
 }
 
 void MainWindow::on_radio_live_proc_toggled(bool checked)
 {
     toggleGroupBox(ui->group_live_proc, checked);
+    if (checked){
+        setChartB();
+        mode = 1;
+    }
 }
 
 void MainWindow::on_radio_record_raw_toggled(bool checked)
 {
     toggleGroupBox(ui->group_record_raw, checked);
+    if (checked){
+        setChartA();
+        mode = 2;
+    }
 }
 
 void MainWindow::on_radio_record_proc_toggled(bool checked)
 {
     toggleGroupBox(ui->group_record_proc, checked);
+    if (checked){
+        setChartB();
+        mode = 3;
+    }
 }
 
 void MainWindow::on_button_start_clicked()
 {
     ui->button_start->setEnabled(false);
     ui->button_stop->setEnabled(true);
+    clearSeries();
+    if (mode == 0 || mode == 1) {
+        emit start(mode, ui->combo_live_all->currentIndex(), ui->spin_live->value(), 0);
+    } else if (mode == 2) {
+        emit start(mode, ui->combo_record_all->currentIndex(), ui->spin_record->value(), ui->spin_record_time_raw->value());
+    } else if (mode == 3) {
+        emit start(mode, ui->combo_record_all->currentIndex(), ui->spin_record->value(), ui->spin_record_time_proc->value());
+    }
 }
 
 void MainWindow::on_button_stop_clicked()
 {
     ui->button_start->setEnabled(true);
     ui->button_stop->setEnabled(false);
+    emit stop();
 }
 
-void MainWindow::updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ)
+void MainWindow::updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ, bool rawOrVel)
 {
     qreal counter = dataX.last().x();
-    seriesX->append(dataX);
-    seriesY->append(dataY);
-    seriesZ->append(dataZ);
+    if (!rawOrVel) {
+        seriesX->append(dataX);
+        seriesY->append(dataY);
+        seriesZ->append(dataZ);
+    } else {
+        seriesVelocityX->append(dataX);
+        seriesVelocityY->append(dataY);
+        seriesVelocityZ->append(dataZ);
+    }
     if (counter > xSeriesLength) {
         chart->axisX()->setRange(counter - xSeriesLength, counter);
-        seriesX->removePoints(0, 20);
-        seriesY->removePoints(0, 20);
-        seriesZ->removePoints(0, 20);
+        if (!rawOrVel) {
+            seriesX->removePoints(0, 20);
+            seriesY->removePoints(0, 20);
+            seriesZ->removePoints(0, 20);
+        } else {
+            seriesVelocityX->removePoints(0, 20);
+            seriesVelocityY->removePoints(0, 20);
+            seriesVelocityZ->removePoints(0, 20);
+        }
     }
 }
 

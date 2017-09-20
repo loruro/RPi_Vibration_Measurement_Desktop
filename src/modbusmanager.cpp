@@ -10,6 +10,7 @@ ModbusManager::ModbusManager(QObject *parent) : QObject(parent)
     dataProcessedUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 242, 24);
     temperatureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 266, 2);
     failureUnit = new QModbusDataUnit(QModbusDataUnit::InputRegisters, 999, 5); // Test
+    setModeUnit = new QModbusDataUnit(QModbusDataUnit::HoldingRegisters, 0, 3);
 
     timer = new QTimer(this);
     processedTimer = new QTimer(this);
@@ -24,7 +25,7 @@ ModbusManager::ModbusManager(QObject *parent) : QObject(parent)
     connect(failureTimer, SIGNAL(timeout()), this, SLOT(readFailure()));
 }
 
-void ModbusManager::start()
+void ModbusManager::connectToDevice()
 {
     modbusDevice = new QModbusRtuSerialMaster(this);
     modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter, "COM4");
@@ -38,9 +39,78 @@ void ModbusManager::start()
     }
 
 //    timer->start(200);
-    processedTimer->start(100);
+//    processedTimer->start(100);
 //    temperatureTimer->start(1000);
     failureTimer->start(5000);
+}
+
+void ModbusManager::start(int _mode, int _rawOrVel, double _step, int _recordTime)
+{
+    counter = 0.0;
+    counterProcessed = 0.0;
+    counterTemperature = 0.0;
+    rawOrVel = _rawOrVel;
+    recordTime = _recordTime;
+
+    switch (_mode) {
+    case 0:
+        if (!rawOrVel) {
+            dataUnit->setStartAddress(2);
+        } else {
+            dataUnit->setStartAddress(122);
+        }
+        frequency = 100;
+        step = 100;
+        mode = 0;
+        break;
+    case 1:
+        frequency = 800;
+        step = (quint16)(_step * 1000);
+        mode = 1;
+        break;
+    case 2:
+        if (!rawOrVel) {
+            dataUnit->setStartAddress(2);
+        } else {
+            dataUnit->setStartAddress(122);
+        }
+        frequency = 800;
+        step = 100;
+        mode = 2;
+        break;
+    case 3:
+        frequency = 800;
+        step = (quint16)(_step * 1000);
+        mode = 3;
+        break;
+    default:
+        break;
+    }
+
+    setModeUnit->setValue(0, frequency);
+    setModeUnit->setValue(1, step);
+    setModeUnit->setValue(2, mode);
+    if (auto *reply = modbusDevice->sendWriteRequest(*setModeUnit, 0x0A)) {
+        if (!reply->isFinished())
+            connect(reply, &QModbusReply::finished, this, &ModbusManager::setModeReady);
+        else
+            delete reply; // broadcast replies return immediately
+    } else {
+        qDebug("Read error\n");
+    }
+}
+
+void ModbusManager::stop()
+{
+    timer->stop();
+    processedTimer->stop();
+    temperatureTimer->stop();
+    failureTimer->stop();
+    modbusDevice->disconnectDevice();
+    if (!modbusDevice->connectDevice()) {
+        qDebug("Connect failed\n");
+    }
+    failureTimer->start();
 }
 
 void ModbusManager::readData()
@@ -77,9 +147,9 @@ void ModbusManager::readDataReady()
             datapointListX.append(QPointF(counter, dataX));
             datapointListY.append(QPointF(counter, dataY));
             datapointListZ.append(QPointF(counter, dataZ));
-            counter+=0.01;
+            counter += 1.0 / frequency;
         }
-        emit updateChart(datapointListX, datapointListY, datapointListZ);
+        emit updateChart(datapointListX, datapointListY, datapointListZ, rawOrVel);
 
     } else {
         qDebug("Read data response error: %d\n", reply->error());
@@ -116,7 +186,7 @@ void ModbusManager::readProcessedDataReady()
             datapointList.append(QPointF(counterProcessed, sample));
         }
         emit updateProcessedSeries(datapointList);
-        counterProcessed += 0.1;
+        counterProcessed += step / 1000.0;
     } else {
         qDebug("Read processed data response error: %d\n", reply->error());
     }
@@ -179,6 +249,30 @@ void ModbusManager::readFailureReady()
         emit updateStatusBar(unit.value(0), unit.value(1), unit.value(2), unit.value(3), unit.value(4));
     } else {
         qDebug("Read failure response error: %d\n", reply->error());
+    }
+
+    reply->deleteLater();
+}
+
+void ModbusManager::setModeReady()
+{
+    auto reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply)
+        return;
+
+    if (reply->error() == QModbusDevice::NoError) {
+        switch (mode) {
+        case 0:
+        case 2:
+            timer->start(1000.0 / frequency * 20);
+            break;
+        case 1:
+        case 3:
+            processedTimer->start(step);
+            break;
+        }
+    } else {
+        qDebug("Set mode response error: %d\n", reply->error());
     }
 
     reply->deleteLater();
