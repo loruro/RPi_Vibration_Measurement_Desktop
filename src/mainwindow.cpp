@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QDebug>
+#include <QDateTime>
 
 // TODO: Cleanup!!!
 
@@ -321,11 +322,20 @@ void MainWindow::on_button_start_clicked()
     ui->button_start->setEnabled(false);
     ui->button_stop->setEnabled(true);
     clearSeries();
+    statusBar()->showMessage(QString("Started..."));
     if (mode == 0 || mode == 1) {
         emit start(mode, ui->combo_live_all->currentIndex(), ui->spin_live->value(), 0);
     } else if (mode == 2) {
+        outputFile.setFileName("raw_" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".txt");
+        outputFile.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&outputFile);
+        out << "Time;Acceleration_X;Acceleration_Y;Acceleration_Z;Velocity_X;Velocity_Y;Velocity_Z\n";
         emit start(mode, ui->combo_record_all->currentIndex(), ui->spin_record->value(), ui->spin_record_time_raw->value());
     } else if (mode == 3) {
+        outputFile.setFileName("processed_" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".txt");
+        outputFile.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&outputFile);
+        out << "Time;RMS_X;RMS_Y;RMS_Z;VRMS_X;VRMS_Y;VRMS_Z;PP_X;PP_Y;PP_Z;Kurtosis_X;Kurtosis_Y;Kurtosis_Z\n";
         emit start(mode, ui->combo_record_all->currentIndex(), ui->spin_record->value(), ui->spin_record_time_proc->value());
     }
 }
@@ -339,59 +349,93 @@ void MainWindow::on_button_stop_clicked()
 
 void MainWindow::updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<QPointF> dataZ, bool rawOrVel)
 {
-    qreal counter = dataX.last().x();
-    if (!rawOrVel) {
-        seriesX->append(dataX);
-        seriesY->append(dataY);
-        seriesZ->append(dataZ);
-    } else {
-        seriesVelocityX->append(dataX);
-        seriesVelocityY->append(dataY);
-        seriesVelocityZ->append(dataZ);
-    }
-    if (counter > xSeriesLength) {
-        chart->axisX()->setRange(counter - xSeriesLength, counter);
+    if (mode == 0) {
+        qreal counter = dataX.last().x();
         if (!rawOrVel) {
-            seriesX->removePoints(0, 20);
-            seriesY->removePoints(0, 20);
-            seriesZ->removePoints(0, 20);
+            seriesX->append(dataX);
+            seriesY->append(dataY);
+            seriesZ->append(dataZ);
         } else {
-            seriesVelocityX->removePoints(0, 20);
-            seriesVelocityY->removePoints(0, 20);
-            seriesVelocityZ->removePoints(0, 20);
+            seriesVelocityX->append(dataX);
+            seriesVelocityY->append(dataY);
+            seriesVelocityZ->append(dataZ);
+        }
+        if (counter > xSeriesLength) {
+            chart->axisX()->setRange(counter - xSeriesLength, counter);
+            if (!rawOrVel) {
+                seriesX->removePoints(0, 20);
+                seriesY->removePoints(0, 20);
+                seriesZ->removePoints(0, 20);
+            } else {
+                seriesVelocityX->removePoints(0, 20);
+                seriesVelocityY->removePoints(0, 20);
+                seriesVelocityZ->removePoints(0, 20);
+            }
+        }
+    } else if (mode == 2) {
+        if (dataX.last().x() >= ui->spin_record_time_raw->value() - 0.000625) {  // Fighting with floats.
+            on_button_stop_clicked();
+            outputFile.close();
+            statusBar()->showMessage(QString("File saved!"));
+            return;
+        }
+        QTextStream out(&outputFile);
+        if (!rawOrVel) {
+            for (int i = 0; i < dataX.length(); ++i) {
+                out << dataX.at(i).x() << ";" << dataX.at(i).y() << ";" << dataY.at(i).y() << ";" << dataZ.at(i).y() << ";;;\n";
+            }
+        } else {
+            for (int i = 0; i < dataX.length(); ++i) {
+                out << dataX.at(i).x() << ";;;;" << dataX.at(i).y() << ";" << dataY.at(i).y() << ";" << dataZ.at(i).y() << "\n";
+            }
         }
     }
 }
 
 void MainWindow::updateProcessedSeries(QList<QPointF> samples)
 {
-    qreal counter = samples.last().x();
-    seriesRMSX->append(samples.at(0));
-    seriesRMSY->append(samples.at(1));
-    seriesRMSZ->append(samples.at(2));
-    seriesVRMSX->append(samples.at(3));
-    seriesVRMSY->append(samples.at(4));
-    seriesVRMSZ->append(samples.at(5));
-    seriesPPX->append(samples.at(6));
-    seriesPPY->append(samples.at(7));
-    seriesPPZ->append(samples.at(8));
-    seriesKurtX->append(samples.at(9));
-    seriesKurtY->append(samples.at(10));
-    seriesKurtZ->append(samples.at(11));
-    if (counter > xSeriesLength) {
-        chart->axisX()->setRange(counter - xSeriesLength, counter);
-        seriesRMSX->removePoints(0, 1);
-        seriesRMSY->removePoints(0, 1);
-        seriesRMSZ->removePoints(0, 1);
-        seriesVRMSX->removePoints(0, 1);
-        seriesVRMSY->removePoints(0, 1);
-        seriesVRMSZ->removePoints(0, 1);
-        seriesPPX->removePoints(0, 1);
-        seriesPPY->removePoints(0, 1);
-        seriesPPZ->removePoints(0, 1);
-        seriesKurtX->removePoints(0, 1);
-        seriesKurtY->removePoints(0, 1);
-        seriesKurtZ->removePoints(0, 1);
+    if (mode == 1) {
+        qreal counter = samples.last().x();
+        seriesRMSX->append(samples.at(0));
+        seriesRMSY->append(samples.at(1));
+        seriesRMSZ->append(samples.at(2));
+        seriesVRMSX->append(samples.at(3));
+        seriesVRMSY->append(samples.at(4));
+        seriesVRMSZ->append(samples.at(5));
+        seriesPPX->append(samples.at(6));
+        seriesPPY->append(samples.at(7));
+        seriesPPZ->append(samples.at(8));
+        seriesKurtX->append(samples.at(9));
+        seriesKurtY->append(samples.at(10));
+        seriesKurtZ->append(samples.at(11));
+        if (counter > xSeriesLength) {
+            chart->axisX()->setRange(counter - xSeriesLength, counter);
+            seriesRMSX->removePoints(0, 1);
+            seriesRMSY->removePoints(0, 1);
+            seriesRMSZ->removePoints(0, 1);
+            seriesVRMSX->removePoints(0, 1);
+            seriesVRMSY->removePoints(0, 1);
+            seriesVRMSZ->removePoints(0, 1);
+            seriesPPX->removePoints(0, 1);
+            seriesPPY->removePoints(0, 1);
+            seriesPPZ->removePoints(0, 1);
+            seriesKurtX->removePoints(0, 1);
+            seriesKurtY->removePoints(0, 1);
+            seriesKurtZ->removePoints(0, 1);
+        }
+    } else if (mode == 3) {
+        if (samples.last().x() >= ui->spin_record_time_proc->value() - 0.05) {  // Fighting with floats.
+            on_button_stop_clicked();
+            outputFile.close();
+            statusBar()->showMessage(QString("File saved!"));
+            return;
+        }
+        QTextStream out(&outputFile);
+        out << samples.at(0).x();
+        for (int i = 0; i < samples.length(); ++i) {
+            out << ";" << samples.at(i).y();
+        }
+        out << "\n";
     }
 }
 

@@ -6,6 +6,7 @@
 #include <QGroupBox>
 #include <QThread>
 #include <QValueAxis>
+#include <QFile>
 
 #include "modbusmanager.h"
 
@@ -62,6 +63,8 @@ private:
     QValueAxis *axisVRMS;
     QValueAxis *axisPP;
     QValueAxis *axisKurt;
+
+    QFile outputFile;
 
     int mode = 0;
 

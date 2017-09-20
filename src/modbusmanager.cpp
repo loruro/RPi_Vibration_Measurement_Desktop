@@ -3,6 +3,7 @@
 #include <QSerialPort>
 #include <QList>
 #include <QVariant>
+#include <QThread>
 
 ModbusManager::ModbusManager(QObject *parent) : QObject(parent)
 {
@@ -41,7 +42,7 @@ void ModbusManager::connectToDevice()
 //    timer->start(200);
 //    processedTimer->start(100);
 //    temperatureTimer->start(1000);
-    failureTimer->start(5000);
+//    failureTimer->start(5000);
 }
 
 void ModbusManager::start(int _mode, int _rawOrVel, double _step, int _recordTime)
@@ -105,12 +106,6 @@ void ModbusManager::stop()
     timer->stop();
     processedTimer->stop();
     temperatureTimer->stop();
-    failureTimer->stop();
-    modbusDevice->disconnectDevice();
-    if (!modbusDevice->connectDevice()) {
-        qDebug("Connect failed\n");
-    }
-    failureTimer->start();
 }
 
 void ModbusManager::readData()
@@ -186,7 +181,7 @@ void ModbusManager::readProcessedDataReady()
             datapointList.append(QPointF(counterProcessed, sample));
         }
         emit updateProcessedSeries(datapointList);
-        counterProcessed += step / 1000.0;
+        counterProcessed += (step / 100) / 10.0; // Fighting with floats.
     } else {
         qDebug("Read processed data response error: %d\n", reply->error());
     }
