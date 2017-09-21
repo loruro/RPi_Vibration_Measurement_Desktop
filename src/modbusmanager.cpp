@@ -258,6 +258,7 @@ void ModbusManager::setModeReady()
     if (reply->error() == QModbusDevice::NoError) {
         switch (mode) {
         case 0:
+            temperatureTimer->start(1000);
         case 2:
             timer->start(1000.0 / frequency * 20);
             break;

@@ -35,11 +35,11 @@ MainWindow::MainWindow(QWidget *parent) :
     temperatureAxis->setTitleText("Temperature [°C]");
     axisRMS = new QValueAxis(this);
     axisRMS->setTickCount(9);
-    axisRMS->setRange(-16, 16);
+    axisRMS->setRange(0, 32);
     axisRMS->setTitleText("RMS [g]");
     axisVRMS = new QValueAxis(this);
     axisVRMS->setTickCount(9);
-    axisVRMS->setRange(-16000, 16000);
+    axisVRMS->setRange(0, 32000);
     axisVRMS->setTitleText("VRMS [mm/s]");
     axisPP = new QValueAxis(this);
     axisPP->setTickCount(9);
@@ -352,24 +352,24 @@ void MainWindow::updateChart(QList<QPointF> dataX, QList<QPointF> dataY, QList<Q
     if (mode == 0) {
         qreal counter = dataX.last().x();
         if (!rawOrVel) {
-            seriesX->append(dataX);
-            seriesY->append(dataY);
-            seriesZ->append(dataZ);
+            if (ui->check_live_x->isChecked()) seriesX->append(dataX);
+            if (ui->check_live_y->isChecked()) seriesY->append(dataY);
+            if (ui->check_live_z->isChecked()) seriesZ->append(dataZ);
         } else {
-            seriesVelocityX->append(dataX);
-            seriesVelocityY->append(dataY);
-            seriesVelocityZ->append(dataZ);
+            if (ui->check_live_x->isChecked()) seriesVelocityX->append(dataX);
+            if (ui->check_live_y->isChecked()) seriesVelocityY->append(dataY);
+            if (ui->check_live_z->isChecked()) seriesVelocityZ->append(dataZ);
         }
         if (counter > xSeriesLength) {
             chart->axisX()->setRange(counter - xSeriesLength, counter);
             if (!rawOrVel) {
-                seriesX->removePoints(0, 20);
-                seriesY->removePoints(0, 20);
-                seriesZ->removePoints(0, 20);
+                if (ui->check_live_x->isChecked()) seriesX->removePoints(0, 20);
+                if (ui->check_live_y->isChecked()) seriesY->removePoints(0, 20);
+                if (ui->check_live_z->isChecked()) seriesZ->removePoints(0, 20);
             } else {
-                seriesVelocityX->removePoints(0, 20);
-                seriesVelocityY->removePoints(0, 20);
-                seriesVelocityZ->removePoints(0, 20);
+                if (ui->check_live_x->isChecked()) seriesVelocityX->removePoints(0, 20);
+                if (ui->check_live_y->isChecked()) seriesVelocityY->removePoints(0, 20);
+                if (ui->check_live_z->isChecked()) seriesVelocityZ->removePoints(0, 20);
             }
         }
     } else if (mode == 2) {
@@ -396,32 +396,48 @@ void MainWindow::updateProcessedSeries(QList<QPointF> samples)
 {
     if (mode == 1) {
         qreal counter = samples.last().x();
-        seriesRMSX->append(samples.at(0));
-        seriesRMSY->append(samples.at(1));
-        seriesRMSZ->append(samples.at(2));
-        seriesVRMSX->append(samples.at(3));
-        seriesVRMSY->append(samples.at(4));
-        seriesVRMSZ->append(samples.at(5));
-        seriesPPX->append(samples.at(6));
-        seriesPPY->append(samples.at(7));
-        seriesPPZ->append(samples.at(8));
-        seriesKurtX->append(samples.at(9));
-        seriesKurtY->append(samples.at(10));
-        seriesKurtZ->append(samples.at(11));
+        if (ui->check_live_rms->isChecked()) {
+            seriesRMSX->append(samples.at(0));
+            seriesRMSY->append(samples.at(1));
+            seriesRMSZ->append(samples.at(2));
+        }
+        if (ui->check_live_vrms->isChecked()) {
+            seriesVRMSX->append(samples.at(3));
+            seriesVRMSY->append(samples.at(4));
+            seriesVRMSZ->append(samples.at(5));
+        }
+        if (ui->check_live_pp->isChecked()) {
+            seriesPPX->append(samples.at(6));
+            seriesPPY->append(samples.at(7));
+            seriesPPZ->append(samples.at(8));
+        }
+        if (ui->check_live_kurt->isChecked()) {
+            seriesKurtX->append(samples.at(9));
+            seriesKurtY->append(samples.at(10));
+            seriesKurtZ->append(samples.at(11));
+        }
         if (counter > xSeriesLength) {
             chart->axisX()->setRange(counter - xSeriesLength, counter);
-            seriesRMSX->removePoints(0, 1);
-            seriesRMSY->removePoints(0, 1);
-            seriesRMSZ->removePoints(0, 1);
-            seriesVRMSX->removePoints(0, 1);
-            seriesVRMSY->removePoints(0, 1);
-            seriesVRMSZ->removePoints(0, 1);
-            seriesPPX->removePoints(0, 1);
-            seriesPPY->removePoints(0, 1);
-            seriesPPZ->removePoints(0, 1);
-            seriesKurtX->removePoints(0, 1);
-            seriesKurtY->removePoints(0, 1);
-            seriesKurtZ->removePoints(0, 1);
+            if (ui->check_live_rms->isChecked()) {
+                seriesRMSX->removePoints(0, 1);
+                seriesRMSY->removePoints(0, 1);
+                seriesRMSZ->removePoints(0, 1);
+            }
+            if (ui->check_live_vrms->isChecked()) {
+                seriesVRMSX->removePoints(0, 1);
+                seriesVRMSY->removePoints(0, 1);
+                seriesVRMSZ->removePoints(0, 1);
+            }
+            if (ui->check_live_pp->isChecked()) {
+                seriesPPX->removePoints(0, 1);
+                seriesPPY->removePoints(0, 1);
+                seriesPPZ->removePoints(0, 1);
+            }
+            if (ui->check_live_kurt->isChecked()) {
+                seriesKurtX->removePoints(0, 1);
+                seriesKurtY->removePoints(0, 1);
+                seriesKurtZ->removePoints(0, 1);
+            }
         }
     } else if (mode == 3) {
         if (samples.last().x() >= ui->spin_record_time_proc->value() - 0.05) {  // Fighting with floats.
@@ -441,9 +457,11 @@ void MainWindow::updateProcessedSeries(QList<QPointF> samples)
 
 void MainWindow::updateTemperatureSeries(qreal x, qreal y)
 {
-    seriesTemperature->append(x, y);
-    if (x > xSeriesLength) {
-        seriesTemperature->removePoints(0, 1);
+    if (ui->check_live_temp->isChecked()) {
+        seriesTemperature->append(x, y);
+        if (x > xSeriesLength) {
+            seriesTemperature->removePoints(0, 1);
+        }
     }
 }
 

@@ -51,6 +51,9 @@
              <property name="text">
               <string>Y</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item row="0" column="0">
@@ -58,12 +61,18 @@
              <property name="text">
               <string>X</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item row="2" column="0">
             <widget class="QCheckBox" name="check_live_z">
              <property name="text">
               <string>Z</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -85,6 +94,9 @@
             <widget class="QCheckBox" name="check_live_temp">
              <property name="text">
               <string>Temperature</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -181,7 +193,7 @@
           <property name="title">
            <string/>
           </property>
-          <layout class="QGridLayout" name="layout_live_proc" rowstretch="2,2,2,2,2,1,2" columnstretch="1,1,1,1,1,5">
+          <layout class="QGridLayout" name="layout_live_proc" rowstretch="2,2,2,2,1,2" columnstretch="1,1,1,1,1,5">
            <item row="0" column="4">
             <widget class="QLabel" name="label_live_s">
              <property name="text">
@@ -189,10 +201,13 @@
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
+           <item row="5" column="0">
             <widget class="QCheckBox" name="check_live_all">
              <property name="text">
               <string>All</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -201,34 +216,10 @@
              <property name="text">
               <string>VRMS</string>
              </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="check_live_env">
-             <property name="text">
-              <string>Envelope</string>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="check_live_rms">
-             <property name="text">
-              <string>RMS</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
-            <spacer name="spacer_live_proc_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
            </item>
            <item row="0" column="3">
             <widget class="QDoubleSpinBox" name="spin_live">
@@ -246,6 +237,39 @@
              </property>
             </widget>
            </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="check_live_rms">
+             <property name="text">
+              <string>RMS</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <spacer name="spacer_live_proc_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="3" column="0">
+            <widget class="QCheckBox" name="check_live_kurt">
+             <property name="text">
+              <string>Kurtosis</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
             <spacer name="spacer_live_proc_1">
              <property name="orientation">
@@ -259,6 +283,16 @@
              </property>
             </spacer>
            </item>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="check_live_pp">
+             <property name="text">
+              <string>P-P</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="2">
             <widget class="QLabel" name="label_live_step">
              <property name="text">
@@ -269,21 +303,7 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QCheckBox" name="check_live_pp">
-             <property name="text">
-              <string>P-P</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QCheckBox" name="check_live_kurt">
-             <property name="text">
-              <string>Kurtosis</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
+           <item row="4" column="0">
             <spacer name="spacer_live_proc_3">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -436,6 +456,9 @@
              <property name="text">
               <string>Y</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item row="0" column="0">
@@ -443,12 +466,18 @@
              <property name="text">
               <string>X</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item row="2" column="0">
             <widget class="QCheckBox" name="check_record_z">
              <property name="text">
               <string>Z</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -487,11 +516,14 @@
           <property name="title">
            <string/>
           </property>
-          <layout class="QGridLayout" name="layout_record_proc" rowstretch="2,2,2,2,2,1,2" columnstretch="1,1,1,1,1,5">
-           <item row="6" column="0">
+          <layout class="QGridLayout" name="layout_record_proc" rowstretch="2,2,2,2,2,1" columnstretch="1,1,1,1,1,5">
+           <item row="5" column="0">
             <widget class="QCheckBox" name="check_record_all">
              <property name="text">
               <string>All</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -499,6 +531,9 @@
             <widget class="QCheckBox" name="check_record_kurt">
              <property name="text">
               <string>Kurtosis</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -514,6 +549,36 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="check_record_pp">
+             <property name="text">
+              <string>P-P</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_record_step">
+             <property name="text">
+              <string>Step</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="check_record_vrms">
+             <property name="text">
+              <string>VRMS</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
            <item row="0" column="3">
             <widget class="QDoubleSpinBox" name="spin_record">
@@ -544,32 +609,8 @@
              </property>
             </spacer>
            </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="label_record_step">
-             <property name="text">
-              <string>Step</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QCheckBox" name="check_record_pp">
-             <property name="text">
-              <string>P-P</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QCheckBox" name="check_record_vrms">
-             <property name="text">
-              <string>VRMS</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="4">
-            <widget class="QLabel" name="label_record_s">
+           <item row="1" column="4">
+            <widget class="QLabel" name="label_record_time_s_proc">
              <property name="text">
               <string>s</string>
              </property>
@@ -580,19 +621,8 @@
              <property name="text">
               <string>RMS</string>
              </property>
-            </widget>
-           </item>
-           <item row="1" column="4">
-            <widget class="QLabel" name="label_record_time_s_proc">
-             <property name="text">
-              <string>s</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="check_record_env">
-             <property name="text">
-              <string>Envelope</string>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -606,6 +636,13 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="label_record_s">
+             <property name="text">
+              <string>s</string>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="2">
             <widget class="QLabel" name="label_record_time_proc">
              <property name="text">
@@ -616,7 +653,7 @@
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
+           <item row="4" column="0">
             <spacer name="spacer_record_proc_3">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
