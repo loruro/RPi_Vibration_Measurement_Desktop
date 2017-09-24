@@ -65,6 +65,7 @@ private:
     QValueAxis *axisKurt;
 
     QFile outputFile;
+    QFile outputFile2;
 
     int mode = 0;
 

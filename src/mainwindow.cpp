@@ -330,6 +330,10 @@ void MainWindow::on_button_start_clicked()
         outputFile.open(QIODevice::WriteOnly | QIODevice::Text);
         QTextStream out(&outputFile);
         out << "Time;Acceleration_X;Acceleration_Y;Acceleration_Z;Velocity_X;Velocity_Y;Velocity_Z\n";
+        outputFile2.setFileName("temperature_" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".txt");
+        outputFile2.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out2(&outputFile2);
+        out2 << "Time;Temperature\n";
         emit start(mode, ui->combo_record_all->currentIndex(), ui->spin_record->value(), ui->spin_record_time_raw->value());
     } else if (mode == 3) {
         outputFile.setFileName("statistic_" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".txt");
@@ -457,11 +461,20 @@ void MainWindow::updateProcessedSeries(QList<QPointF> samples)
 
 void MainWindow::updateTemperatureSeries(qreal x, qreal y)
 {
-    if (ui->check_live_temp->isChecked()) {
-        seriesTemperature->append(x, y);
-        if (x > xSeriesLength) {
-            seriesTemperature->removePoints(0, 1);
+    if (mode == 0) {
+        if (ui->check_live_temp->isChecked()) {
+            seriesTemperature->append(x, y);
+            if (x > xSeriesLength) {
+                seriesTemperature->removePoints(0, 1);
+            }
         }
+    } else if (mode == 2) {
+        if (x >= ui->spin_record_time_raw->value() - 0.125) {  // Fighting with floats.
+            outputFile2.close();
+            return;
+        }
+        QTextStream out(&outputFile2);
+        out << x << ";" << y << "\n";
     }
 }
 

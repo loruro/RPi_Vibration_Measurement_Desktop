@@ -213,7 +213,7 @@ void ModbusManager::readTemperatureReady()
         *((uint16_t *)&temperature + 0) = unit.value(0);
         *((uint16_t *)&temperature + 1) = unit.value(1);
         emit updateTemperatureSeries(counterTemperature, temperature);
-        counterTemperature += 1;
+        counterTemperature += 0.25;
     } else {
         qDebug("Read data response error: %d\n", reply->error());
     }
@@ -258,9 +258,10 @@ void ModbusManager::setModeReady()
     if (reply->error() == QModbusDevice::NoError) {
         switch (mode) {
         case 0:
-            temperatureTimer->start(1000);
         case 2:
-            timer->start(1000.0 / frequency * 20);
+            temperatureTimer->start(250);
+            timer->start(200);
+//            timer->start(1000.0 / frequency * 20);
             break;
         case 1:
         case 3:
