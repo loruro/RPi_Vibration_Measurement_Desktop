@@ -173,7 +173,7 @@
         <item>
          <widget class="QRadioButton" name="radio_live_raw">
           <property name="text">
-           <string>Live Raw Data</string>
+           <string>Live Signal Data</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -324,7 +324,7 @@
         <item>
          <widget class="QRadioButton" name="radio_live_proc">
           <property name="text">
-           <string>Live Processed Data</string>
+           <string>Live Statistic Data</string>
           </property>
          </widget>
         </item>
@@ -475,7 +475,7 @@
         <item>
          <widget class="QRadioButton" name="radio_record_raw">
           <property name="text">
-           <string>Record Raw Data</string>
+           <string>Record Signal Data</string>
           </property>
          </widget>
         </item>
@@ -647,7 +647,7 @@
         <item>
          <widget class="QRadioButton" name="radio_record_proc">
           <property name="text">
-           <string>Record Processed Data</string>
+           <string>Record Statistic Data</string>
           </property>
          </widget>
         </item>

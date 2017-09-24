@@ -23,8 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     axisX->setTitleText("Time [s]");
     axisRaw = new QValueAxis(this);
     axisRaw->setTickCount(9);
-    axisRaw->setRange(-16, 16);
-    axisRaw->setTitleText("Acceleration [g]");
+    axisRaw->setRange(-160, 160);
+    axisRaw->setTitleText("Acceleration [m/s²]");
     axisVelocity = new QValueAxis(this);
     axisVelocity->setTickCount(9);
     axisVelocity->setRange(-16000, 16000);
@@ -35,16 +35,16 @@ MainWindow::MainWindow(QWidget *parent) :
     temperatureAxis->setTitleText("Temperature [°C]");
     axisRMS = new QValueAxis(this);
     axisRMS->setTickCount(9);
-    axisRMS->setRange(0, 32);
-    axisRMS->setTitleText("RMS [g]");
+    axisRMS->setRange(0, 320);
+    axisRMS->setTitleText("RMS [m/s²]");
     axisVRMS = new QValueAxis(this);
     axisVRMS->setTickCount(9);
     axisVRMS->setRange(0, 32000);
     axisVRMS->setTitleText("VRMS [mm/s]");
     axisPP = new QValueAxis(this);
     axisPP->setTickCount(9);
-    axisPP->setRange(0, 32);
-    axisPP->setTitleText("Peak-to-peak [g]");
+    axisPP->setRange(0, 320);
+    axisPP->setTitleText("Peak-to-peak [m/s²]");
     axisKurt = new QValueAxis(this);
     axisKurt->setTickCount(9);
     axisKurt->setRange(0, 32);
@@ -326,13 +326,13 @@ void MainWindow::on_button_start_clicked()
     if (mode == 0 || mode == 1) {
         emit start(mode, ui->combo_live_all->currentIndex(), ui->spin_live->value(), 0);
     } else if (mode == 2) {
-        outputFile.setFileName("raw_" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".txt");
+        outputFile.setFileName("signal_" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".txt");
         outputFile.open(QIODevice::WriteOnly | QIODevice::Text);
         QTextStream out(&outputFile);
         out << "Time;Acceleration_X;Acceleration_Y;Acceleration_Z;Velocity_X;Velocity_Y;Velocity_Z\n";
         emit start(mode, ui->combo_record_all->currentIndex(), ui->spin_record->value(), ui->spin_record_time_raw->value());
     } else if (mode == 3) {
-        outputFile.setFileName("processed_" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".txt");
+        outputFile.setFileName("statistic_" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + ".txt");
         outputFile.open(QIODevice::WriteOnly | QIODevice::Text);
         QTextStream out(&outputFile);
         out << "Time;RMS_X;RMS_Y;RMS_Z;VRMS_X;VRMS_Y;VRMS_Z;PP_X;PP_Y;PP_Z;Kurtosis_X;Kurtosis_Y;Kurtosis_Z\n";
